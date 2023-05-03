@@ -94,9 +94,6 @@ def case1(self):
     # k = 0
 
 def sortCaseNode(self,listNode):
-    '''
-    按照运行时间的降序排列
-    '''
     for i in range(len(listNode)-1):
         for j in range(i+1,len(listNode)):
             if self[listNode[i]].runtime<self[listNode[j]].runtime:
@@ -123,13 +120,6 @@ def case2(self):
                 listSucNode.append(self[listNode[i]].outputs[j].id)
             # sortCaseNode(self,listSucNode[i])   [len(listSucNode)-1]
 
-    # listSucNode = []
-    # for i in range(len(listNode)):
-    #     if set(self[listNode[i]].outputs):
-    #         listSucNode.insert(len(listSucNode), [])
-    #         for j in range(len(self[listNode[i]].outputs)):
-    #             listSucNode[len(listSucNode)-1].append(self[listNode[i]].outputs[j].id)
-    #         # sortCaseNode(self,listSucNode[i])
     return  listNode, listSucNode         
 
 def case3(self):
@@ -152,14 +142,6 @@ def case3(self):
             for j in range(len(self[listNode[i]].inputs)):
                 listPreNode.append(self[listNode[i]].inputs[j].id)
             # sortCaseNode(self,listPreNode[i])           [len(listPreNode)-1]
-
-    # listPreNode = []
-    # for i in range(len(listNode)):
-    #     if set(self[listNode[i]].inputs):
-    #         listPreNode.insert(len(listPreNode), [])
-    #         for j in range(len(self[listNode[i]].inputs)):
-    #             listPreNode[len(listPreNode)-1].append(self[listNode[i]].inputs[j].id)
-    #         # sortCaseNode(self,listPreNode[i])
     return  listNode, listPreNode
 
 def case4(self):
@@ -242,41 +224,6 @@ def taskTopologicalLevel(self):
             DAGLevel[value1].append(key1)
             self[key1].Level = value1
 
-    # '''以下是从根节点起分层 目前的7种工作流结构，
-    #     只有适用于SIPHT工作流，其他工作流不受影响，
-    #     故当SIPHT工作流效果不好时可以使用 '''
-    # setLevelNode = set() 
-    # dictNodeLevel = {}
-    # intflag = 0
-    # while True:
-    #     for name,task in self.items():  
-    #         if (not(name in setLevelNode)):
-    #             if (len(task.outputs)==0):         
-    #                 setLevelNode.add(name)
-    #                 dictNodeLevel[name] = len(DAGLevel)-1
-    #                 intflag += 1     
-    #             elif  (len(task.inputs)==0):   
-    #                 setLevelNode.add(name)
-    #                 dictNodeLevel[name] = 0
-    #                 intflag += 1 
-    #             else:
-    #                 sucNodedict = {}
-    #                 for each in range(len(task.outputs)):
-    #                     if task.outputs[each].id in setLevelNode:
-    #                         sucNodedict[task.outputs[each].id] = dictNodeLevel[task.outputs[each].id]
-    #                     else:
-    #                         break
-    #                 if len(sucNodedict)==len(task.outputs):
-    #                     dictNodeLevel[name] = min(list(sucNodedict.values()))-1
-    #                     setLevelNode.add(name)
-    #                     intflag += 1
-    #     if intflag == len(self):
-    #         break
-    # DAGLevel_RootNode = [[] for i in range(len(DAGLevel))]
-    # for key1,value1 in dictNodeLevel.items():
-    #     DAGLevel_RootNode[value1].append(key1)
-
-    ## 按执行时间降序排列
     for k in range(len(DAGLevel)):
         for i in range(len(DAGLevel[k])-1):
             for j in range(i+1,len(DAGLevel[k])):
@@ -303,23 +250,16 @@ def ShortestExecuteTime(self):
                 self[i],self[j] = self[j],self[i]
 
 def getEST(self):
-    NumPre = len(self.inputs)  #父节点的个数
-    NumSuc = len(self.outputs) #子节点的个数  
-    vmn = None                 #将要选择的VM
-    taskcore = None            #将要选择的VM的核      
-    EST = 0                 #最早开始时间
+    NumPre = len(self.inputs)  
+    NumSuc = len(self.outputs) 
+    vmn = None                 
+    taskcore = None                  
+    EST = 0                 
     listInputs = self.inputs
-    # if NumPre>0:
-    '''
-    包含父节点的task，先计算最早可开始时间（所有父节点最晚的完工时间、相应的父节点）和对应的VM、父节点所在VM的完工时间
-    最早可开始时间（Earliest Start Time, EST）      EST_VM(当跨VM时需要传输时间)
-    父节点所在VM的完工时间
 
-    在计算当前节点的开始时间时，要加上父节点的传输时间
-    '''    
     VMNums = len(VMS)               
     listESTVM = []
-    for j in range(VMNums):                     #listESTVM[j][k] 第j台VM的第k个核上的EST,最后在此列表中取最小的VM、核
+    for j in range(VMNums):                     
         listESTVM.append([])
         for k in range(VMS[j].NumCores):
             listESTVM[j].append(VMS[j].CompleteTime[k])
@@ -339,13 +279,12 @@ def getEST(self):
             else:
                 DataTransferRate = VMT.B[VMS[ SimplifiedWorkflow[listEST[0][j]].VMnum].id]
             
-            DataTransferTime = 0 if DataTransferRate == 0 else (listInputs[j].size/DataTransferRate * DTT)  #将传输时间放大DTT倍 
-            
+            DataTransferTime = 0 if DataTransferRate == 0 else (listInputs[j].size/DataTransferRate * DTT)  
             startTimePreDTT = listEST[1][j]+DataTransferTime
             for k in range(VMS[j1].NumCores):
                 listESTVM[j1][k] = max(listESTVM[j1][k],startTimePreDTT) #,VMS[j1].CompleteTime[k]
 
-    if EachLevelVM != []:  ##  此处修改了下面一段的写法
+    if EachLevelVM != []:  ##
         listX = [ min(listESTVM[j]) for j in EachLevelVM]
         # EST = min(listX)
 
@@ -428,23 +367,16 @@ def getEST(self):
         return vmn,taskcore,EST
 
 def getEST_EFT(self):
-    NumPre = len(self.inputs)  #父节点的个数
-    NumSuc = len(self.outputs) #子节点的个数  
-    vmn = None                 #将要选择的VM
-    taskcore = None            #将要选择的VM的核      
-    EFT = 0                 #最早开始时间
+    NumPre = len(self.inputs) 
+    NumSuc = len(self.outputs)  
+    vmn = None                 
+    taskcore = None                  
+    EFT = 0                
     listInputs = self.inputs
-    # if NumPre>0:
-    '''
-    包含父节点的task，先计算最早可开始时间（所有父节点最晚的完工时间、相应的父节点）和对应的VM、父节点所在VM的完工时间
-    最早可开始时间（Earliest Start Time, EST）      EST_VM(当跨VM时需要传输时间)
-    父节点所在VM的完工时间
 
-    在计算当前节点的开始时间时，要加上父节点的传输时间
-    '''   
     VMNums = len(VMS)                
     listESTVM = []
-    for j in range(VMNums):                     #listESTVM[j][k] 第j台VM的第k个核上的EST,最后在此列表中取最小的VM、核
+    for j in range(VMNums):                     
         listESTVM.append([])
         for k in range(VMS[j].NumCores):
             listESTVM[j].append(VMS[j].CompleteTime[k])
@@ -508,10 +440,8 @@ def CalcaulateTaskObject(taskID,vmn,taskcore,EST):
     # vmn,taskcore,EST = getEST(SimplifiedWorkflow[taskID])
 
     SimplifiedWorkflow[taskID].VMnum = vmn  
-    #待定，需要修改                
     SimplifiedWorkflow[taskID].VMcore = taskcore        
         
-    #开始执行时间待定，需要修改   '空格\' 为换行符
     SimplifiedWorkflow[taskID].StartTime = EST           # min(VMS[vmn].CompleteTime)
     SimplifiedWorkflow[taskID].FinishTime = EST + (SimplifiedWorkflow[taskID].runtime
                                                         /VMT.ProcessingCapacity[VMS[vmn].id])
@@ -523,61 +453,17 @@ def CalcaulateTaskObject(taskID,vmn,taskcore,EST):
     VMS[vmn].VMTime[taskcore].insert(len(VMS[vmn].VMTime[taskcore]),list1)
 
 def gantt(self):
-    """甘特图
-    m机器集
-    t时间集
-    plt.barh(y,data,left=())  y是条形图的位置，data是条形图的大小，left是条形图坐标的距离。
-    plt.barh(y, width, left, edgecolor, color)
-
-    y 参数表示y轴坐标
-
-    width 表示矩形块的长度，也就是任务加工时间，任务持续时间等参数
-
-    left 表示矩形块最左边的 x轴坐标，
-
-    这样就能确定一个矩形块在图中的位置
-
-    edgecolor 表示矩形块的边的颜色，通常设置为 black
-
-    color 表示矩形块的颜色
-    plt.text(x, y, label, font_style)
-    x 表示x轴坐标
-    y 表示y轴坐标
-    label 表示要添加的标签内容
-    font_style 标签字体的风格
-
-    6）plt.annotate(s, xy, xytext) # 添加注释，除s、xy外其余还有若干可选参数。
-
-    s：注释文本，
-
-    xy：指定要注释的（x，y）坐标点，
-
-    xytext：可选，指定要放置文本的（x，y）坐标点。如果没有，则默认为xy注释点。
-
-    arrowprops：可选，字典形式，用于在xy坐标和xytext间绘制一个指定形状的箭头，本例中指定一个'->'类型的箭头，箭头头部宽和高为0.2/0.4。
-
-    7）plt.quiver(X, Y, U, V, C, **kw) # 绘制一个二维的箭头，X, Y, C可以缺失。
-
-    X, Y：箭头的位置，
-
-    U, V：表示箭头的方向，
-
-    C：设置箭头的颜色，
-
-    **kw里还有一系列参数可以设置，包括单位、箭头角度、箭头的头部宽高设置等，这里设置了颜色color和箭头的轴宽度width。    
-    """
-    plt.rcParams['font.sans-serif'] = ['SimHei']#解决中文显示为方框的问题  "|","+",
+   
+    plt.rcParams['font.sans-serif'] = ['SimHei']#
     colors = ['red', 'orange', 'gold', 'lawngreen', 'lightseagreen', 'royalblue','blueviolet']
     # colors = ['dimgray','tan','lightblue','coral','g','r','silver','y','c']
     marks = ["","\\","/","X","+",".","*","o"]
-    #画布设置，大小与分辨率
     plt.figure(figsize=(20,8),dpi=80)
-    #barh-柱状图换向，循坏迭代-层叠效果
     listY = []
     strY = []
     yHeigh = 0
     VMNums = len(self)
-    for VMnumID in range(VMNums):                               #VM层
+    for VMnumID in range(VMNums):                               #
         ProcessingTasks = False
         for TaskCoreID in range(self[VMnumID].NumCores):
             if len(self[VMnumID].TaskCore[TaskCoreID])>0:
@@ -585,7 +471,7 @@ def gantt(self):
                break 
         if ProcessingTasks:    
             plt.axhline(y=yHeigh+0.6, c="r", ls="--", lw=2)  
-            for TaskCoreID in range(self[VMnumID].NumCores) :        #VM的核层
+            for TaskCoreID in range(self[VMnumID].NumCores) :        
                 if len(self[VMnumID].TaskCore[TaskCoreID])>0:
                     yHeigh = yHeigh + 1
                     listY.insert(len(listY), yHeigh)
@@ -646,22 +532,19 @@ def gantt(self):
     # plt.title("WorkflowScheduling_%s_%s"%(GlobalResource.WorkFlowTestName,os.path.basename(__file__).split(".")[0]))
     plt.title("WorkflowScheduling_%s_%s_%s"%(WorkFlowTestName,DeadlineFactor,os.path.basename(__file__).split(".")[0]))
     # plt.legend(handles=patches,loc=4)
-    #XY轴标签
     plt.xlabel("Time/s")
     plt.ylabel("VM")    
-    #plt.grid(linestyle="--",alpha=0.5)  #网格线
+    #plt.grid(linestyle="--",alpha=0.5)  #
     plt.savefig(".\GanttChart\WorkflowScheduling_%s_%s_%s1.png"%(WorkFlowTestName,DeadlineFactor,
         os.path.basename(__file__).split(".")[0]), dpi=300, format='png',bbox_inches="tight")
     # plt.show()     gantt_VMState(VMS)
 
 def gantt_VMState(self):
-    plt.rcParams['font.sans-serif'] = ['SimHei']#解决中文显示为方框的问题  "|","+",
+    plt.rcParams['font.sans-serif'] = ['SimHei']#",
     colors = ['red', 'orange', 'gold', 'lawngreen', 'lightseagreen', 'royalblue','blueviolet']
     # colors = ['dimgray','tan','lightblue','coral','g','r','silver','y','c']
     marks = ["","\\","/","X","+",".","*","o"]
-    #画布设置，大小与分辨率
     plt.figure(figsize=(20,8),dpi=80)
-    #barh-柱状图换向，循坏迭代-层叠效果
     listY = []
     strY = []
     yHeigh = 0
@@ -748,9 +631,6 @@ def gantt_VMState(self):
     CmaxCore = None 
     y3 = 0
     for task,task1 in SimplifiedWorkflow.items(): 
-        '''
-        绘制含传输时间的边
-        '''  
         if Cmax<task1.FinishTime:
             Cmax = task1.FinishTime
             CmaxVm = SimplifiedWorkflow[task].VMnum
@@ -782,10 +662,9 @@ def gantt_VMState(self):
     # plt.title("WorkflowScheduling_%s_%s"%(GlobalResource.WorkFlowTestName,os.path.basename(__file__).split(".")[0]))
     # plt.title("WorkflowScheduling_%s_%s_%s"%(WorkFlowTestName,DeadlineFactor,os.path.basename(__file__).split(".")[0]))
     # plt.legend(handles=patches,loc=4)
-    #XY轴标签
     plt.xlabel("Time/s",fontsize = FontSize)
     plt.ylabel("VM",fontsize = FontSize)    
-    #plt.grid(linestyle="--",alpha=0.5)  #网格线
+    #plt.grid(linestyle="--",alpha=0.5)
     plt.savefig(".\GanttChart\WorkflowScheduling_%s_%s_%s1.png"%(WorkFlowTestName,DeadlineFactor,
         os.path.basename(__file__).split(".")[0]), dpi=300, format='png',bbox_inches="tight")
     plt.show()    # gantt_VMState(VMS)
@@ -802,19 +681,17 @@ def Adaptively_Adjust_First_Task_Block():
                     tasklist = [VMS[VMnumID].TaskCore[TaskCoreID][0]]
                     for t_i in range(1,len(VMS[VMnumID].TaskCore[TaskCoreID])):    #逐个任务
                         if VMS[VMnumID].VMTime[TaskCoreID][t_i-1][1] == VMS[VMnumID].VMTime[TaskCoreID][t_i][0]:
-                            # 上一个任务的完成时间  == 当前任务的开始时间
+                           
                             tasklist.append(VMS[VMnumID].TaskCore[TaskCoreID][t_i])#insert(len(tasklist),VMS[VMnumID].TaskCore[TaskCoreID][t_i])
                         else:
                             break
                     # if True: #len(tasklist)<len(VMS[VMnumID].TaskCore[TaskCoreID]):
                         
-                    # DelayTime = min{LFT,AFT} 延迟的时间
-                    # LFT :最晚完成时间，每个子任务的开始时间减去与该任务的传输时间  AFT：实际完成时间
-                    # TransTime:传输时间
+
                     LFT = []
                     AFT = []
                     for each in tasklist:                            
-                        list_AST_TransT = []   #AST减去 传输时间
+                        list_AST_TransT = []   
                         if SimplifiedWorkflow[each].outputs == []:
                             list_AST_TransT.append(SimplifiedWorkflow[each].FinishTime)   # AFT # (Deadline)
                         else:
@@ -852,19 +729,19 @@ def Adaptively_Adjust_First_Task_Block():
 ############ 2021 10 13   ######################################################################
 def BlockTime_IdleTime_Sort(): 
     tasklist_VM_Core = []
-    for VMnumID in range(VMNums):                                       #VM 
-        for TaskCoreID in range(VMS[VMnumID].NumCores):                 #对应的核                
-            if len(VMS[VMnumID].TaskCore[TaskCoreID]) > 1:              #任务个数大于1
+    for VMnumID in range(VMNums):                                       
+        for TaskCoreID in range(VMS[VMnumID].NumCores):                                
+            if len(VMS[VMnumID].TaskCore[TaskCoreID]) > 1:             
                 tasklist = [VMS[VMnumID].TaskCore[TaskCoreID][len(VMS[VMnumID].TaskCore[TaskCoreID])-1]]
-                for t_i in range(len(VMS[VMnumID].TaskCore[TaskCoreID])-2,-1,-1):    #逐个任务
+                for t_i in range(len(VMS[VMnumID].TaskCore[TaskCoreID])-2,-1,-1):   
                     if VMS[VMnumID].VMTime[TaskCoreID][t_i][1] == VMS[VMnumID].VMTime[TaskCoreID][t_i+1][0]:
-                        # 当前任务的完成时间  == 下一个任务的开始时间
+                        
                         tasklist.append(VMS[VMnumID].TaskCore[TaskCoreID][t_i])#insert(len(tasklist),VMS[VMnumID].TaskCore[TaskCoreID][t_i])
                     else:
                         break
                 if len(tasklist)<len(VMS[VMnumID].TaskCore[TaskCoreID]):  
                     tasklist_VM_Core.insert(len(tasklist_VM_Core),[(VMnumID,TaskCoreID)])   # (Vm_num,Core_num)
-                    tasklist_VM_Core[len(tasklist_VM_Core)-1].append(tasklist)              # [块结构的任务]
+                    tasklist_VM_Core[len(tasklist_VM_Core)-1].append(tasklist)              
                     BlockTime = VMS[VMnumID].VMTime[TaskCoreID][len(VMS[VMnumID].TaskCore[TaskCoreID])-1][1]- VMS[VMnumID].VMTime[TaskCoreID][t_i+1][0]
                     IdleTime = VMS[VMnumID].VMTime[TaskCoreID][t_i+1][0] - VMS[VMnumID].VMTime[TaskCoreID][t_i][1]
                     tasklist_VM_Core[len(tasklist_VM_Core)-1].append([(BlockTime,IdleTime),BlockTime/IdleTime]) 
@@ -887,13 +764,7 @@ def TaskScheduling_Blocks(BTIS):
     k = TaskList[0]
     j = k
 
-def VMStateAdjustment():
-    """
-    VM状态首先是开关机过程中的持续时间，
-    """
-    k = 1
 
-###########################################################################
 ###########################################################################
 ###########################################################################
 def gantt_VMState_MultiWorkflow(self,multiWorflow,objectives):
@@ -901,7 +772,7 @@ def gantt_VMState_MultiWorkflow(self,multiWorflow,objectives):
     # font = FontProperties()
     # font.set_name('Times New Roman')
     # path = '/path/to/custom/font.ttf'
-    # plt.rcParams['font.sans-serif'] = ['Times New Roman']#解决中文显示为方框的问题  "|","+",
+    # plt.rcParams['font.sans-serif'] = ['Times New Roman']
     # myfont=fm.FontProperties(fname=".\\Class\\times.ttf")
     plt.rcParams["font.family"] = "times new roman"
     colorNum = 10
@@ -910,9 +781,7 @@ def gantt_VMState_MultiWorkflow(self,multiWorflow,objectives):
     # ['red', 'royalblue', 'gold', 'lawngreen', 'orange', 'blueviolet']
     # colors = ['dimgray','tan','lightblue','coral','g','r','silver','y','c']'lightseagreen',
     marks = ["","\\","/","X","+",".","*","o"]
-    #画布设置，大小与分辨率
     plt.figure(dpi=85)
-    #barh-柱状图换向，循坏迭代-层叠效果figsize=(20,8),
     listY = []
     strY = []
     yHeigh = -0.15
@@ -928,7 +797,7 @@ def gantt_VMState_MultiWorkflow(self,multiWorflow,objectives):
         VMNums = len(self[CloudID])
         num = 0
         plt.axhline(y=yHeigh + BarHeight*0.6, c="r", ls="-", lw=LineWidth*1.5)    
-        for VMnumID in range(VMNums):                               #VM层
+        for VMnumID in range(VMNums):                             
             ProcessingTasks = False
             for TaskCoreID in range(self[CloudID][VMnumID].NumCores):
                 if len(self[CloudID][VMnumID].TaskCore[TaskCoreID])>0:
@@ -936,7 +805,7 @@ def gantt_VMState_MultiWorkflow(self,multiWorflow,objectives):
                     break 
             if ProcessingTasks:    
                 # plt.axhline(y=yHeigh+BarHeight*0.6, c="r", ls="--", lw=LineWidth)  
-                for TaskCoreID in range(self[CloudID][VMnumID].NumCores) :        #VM的核层
+                for TaskCoreID in range(self[CloudID][VMnumID].NumCores) :        
                     if len(self[CloudID][VMnumID].TaskCore[TaskCoreID])>0:
                         num += 1
                         yHeigh = yHeigh + BarHeight*1.2
@@ -1032,9 +901,7 @@ def gantt_VMState_MultiWorkflow(self,multiWorflow,objectives):
     # taskVMHeigh[str(wNum)+'_'+str(task)]
     for i in range(len(multiWorflow)):
         for taskID,task in multiWorflow[i].items(): 
-            '''
-            绘制含传输时间的边
-            '''  
+     
             VMnumID = task.VMnum 
             for parent in task.inputs:
                 parentVMID = multiWorflow[i][parent.id].VMnum 
@@ -1058,11 +925,9 @@ def gantt_VMState_MultiWorkflow(self,multiWorflow,objectives):
     plt.title("WorkflowScheduling_%s_%.3f_%.3f_%.3f_%.3f"%(WorkFlowTestName, #GlobalResource. _%s os.path.basename(__file__).split(".")[0],
                                         objectives.Cmax,objectives.Cost,objectives.Energy,objectives.TotalTardiness))
     # plt.title("WorkflowScheduling_%s_%s_%s"%(WorkFlowTestName,DeadlineFactor,os.path.basename(__file__).split(".")[0]))
-    # plt.legend(handles=patches,loc=4)
-    #XY轴标签
     plt.xlabel("Time/s",fontsize = FontSize)
     plt.ylabel("VM",fontsize = FontSize)    
-    #plt.grid(linestyle="--",alpha=0.5)  #网格线
+    #plt.grid(linestyle="--",alpha=0.5)  
     plt.savefig(".\GanttChart\WorkflowScheduling_%s_%s_%s.png"%(WorkFlowTestName,DeadlineFactor,
         os.path.basename(__file__).split(".")[0]), dpi=300, format='png',bbox_inches="tight")
     plt.show()    # gantt_VMState(VMS)
@@ -1087,15 +952,7 @@ def case1_Private(self):
                     tempTask = self[tempTask.outputs[0].id]
                 else:
                     break                 
-                # if (len(tempTask.outputs)==1):
-                #     if (len(self[tempTask.outputs[0].id].inputs)==1):
-                #         tempList.append(tempTask.outputs[0].id)
-                #         tempName = tempTask.outputs[0].id
-                #         tempTask = self[tempTask.outputs[0].id] 
-                #     else:
-                #         break 
-                # else:
-                #     break 
+           
         if len(tempList)>1: 
             listNode.insert(len(listNode),tempList) 
     for i in range(len(listNode)):
@@ -1140,7 +997,7 @@ def getMET_SubDeadline(workflow):
         MET[taskid] =task.runtime /GlobalResource.maxECU #math.trunc( )   
     return MET
 
-def breadth_first_search_SubDeadline(workflow):#从前往后
+def breadth_first_search_SubDeadline(workflow):
     def bfs():
         while len(queue)> 0:
             node = queue.pop(0)
@@ -1154,7 +1011,7 @@ def breadth_first_search_SubDeadline(workflow):#从前往后
     DAG[len(DAG)] = Task(len(DAG),name = 'entry')
     list1 = [taskId for taskId,task in DAG.items()]
     for taskid in list1: #range(len(DAG)-1):
-        if DAG[taskid].inputs == []:   #原源节点 size = 0  JITCAWorkflow[len(JITCAWorkflow)-1]
+        if DAG[taskid].inputs == []:   
             tout = File('EntryOut', id = len(DAG)-1)
             DAG[taskid].inputs.append(tout)
             tout = File('Entry', id = taskid)
@@ -1225,13 +1082,6 @@ def getLFT(workflow,MET,Deadline):
     return LFT,LST
 
 def getSubDeadline(workflow,Deadline):
-    # ## subD_i = 
-    # MET = getMET_SubDeadline(workflow)
-    # EST,EFT = getEST_SubDeadline(workflow,MET)
-    # SlackTime_maxEFT = 0.95*Deadline/max(EFT) # (1+(Deadline-max(EFT))/max(EFT) ) # 
-    # for taskid,task in workflow.items():
-    #     task.XFT = EFT[taskid] * SlackTime_maxEFT
-    # # return workflow
 
     MET = getMET_SubDeadline(workflow)
     LFT,LST = getLFT(workflow,MET,Deadline)
@@ -1239,7 +1089,7 @@ def getSubDeadline(workflow,Deadline):
         if task.outputs ==[]:
             task.XFT = LFT[taskid]
         else:
-            task.XFT = 0.95*LFT[taskid]  # # 对 sub-deadline 缩放
+            task.XFT = 0.95*LFT[taskid]  # # 
         task.LFT = LFT[taskid]
 
 def ResetDeadline(workflow,DeadlineFactor):
@@ -1252,16 +1102,12 @@ def ResetDeadline(workflow,DeadlineFactor):
 
 def Adaptively_Adjust_First_Task_Block_Multiworkflow(): 
     global VMS,multiWorflow  
-    '''仅调整任务的开始和结束时间，结束时间设置为当前调度结果下的最晚结束时间''' 
     def AdjustListTasks():#tasklist,CloudID,VMnumID,TaskCoreID
         nonlocal no_find_Block
-        # DelayTime = min{LFT,AFT} 延迟的时间
-        # LFT :最晚完成时间，每个子任务的开始时间减去与该任务的传输时间  AFT：实际完成时间
-        # TransTime:传输时间
         LFT = []
         AFT = []
         for each in tasklist:                            
-            list_AST_TransT = []   #AST减去 传输时间
+            list_AST_TransT = []   
             if multiWorflow[each[0]][each[1]].outputs == []:
                 list_AST_TransT.append(multiWorflow[each[0]][each[1]].FinishTime)   # AFT # (Deadline)
             else:
@@ -1274,7 +1120,7 @@ def Adaptively_Adjust_First_Task_Block_Multiworkflow():
                             TransTime = 0
                         else:
                             DataTransferRate = min(VMT[CloudID].B[VMS[CloudID][VMnumID].id],  VMT[PreVMnum[0]].B[VMS[PreVMnum[0]][PreVMnum[1]].id]   )
-                            TransTime = (child.size/DataTransferRate * DTT)  #将传输时间放大DTT倍 
+                            TransTime = (child.size/DataTransferRate * DTT)  
                         list_AST_TransT.append(AST_child-TransTime)
             if list_AST_TransT != []:        
                 LFT.append(min(list_AST_TransT))
@@ -1296,13 +1142,12 @@ def Adaptively_Adjust_First_Task_Block_Multiworkflow():
         for CloudID in HYBRIDCLOUD:
             VMNums = len(VMS[CloudID])
             for VMnumID in range(VMNums):                                       #VM 
-                for TaskCoreID in range(VMS[CloudID][VMnumID].NumCores):                 #对应的核                
+                for TaskCoreID in range(VMS[CloudID][VMnumID].NumCores):                              
                     Totaltask = len(VMS[CloudID][VMnumID].TaskCore[TaskCoreID])
-                    if Totaltask > 0:              #任务个数大于1
+                    if Totaltask > 0:             
                         tasklist = [VMS[CloudID][VMnumID].TaskCore[TaskCoreID][0]]
-                        for t_i in range(1,Totaltask):    #逐个任务
+                        for t_i in range(1,Totaltask):    
                             if VMS[CloudID][VMnumID].VMTime[TaskCoreID][t_i-1][1] == VMS[CloudID][VMnumID].VMTime[TaskCoreID][t_i][0]:
-                                # 上一个任务的完成时间  == 当前任务的开始时间
                                 tasklist.append(VMS[CloudID][VMnumID].TaskCore[TaskCoreID][t_i])#insert(len(tasklist),VMS[VMnumID].TaskCore[TaskCoreID][t_i])
                             else:
                                 break     
@@ -1311,16 +1156,12 @@ def Adaptively_Adjust_First_Task_Block_Multiworkflow():
 
 def Adjust_Scheduling():
     global VMS,multiWorflow  
-    '''仅调整任务的开始和结束时间，结束时间设置为当前调度结果下的最晚结束时间''' 
     def AdjustListTasks():#tasklist,CloudID,VMnumID,TaskCoreID
         nonlocal no_find_Block
-        # DelayTime = min{LFT,AFT} 延迟的时间
-        # LFT :最晚完成时间，每个子任务的开始时间减去与该任务的传输时间  AFT：实际完成时间
-        # TransTime:传输时间
         LFT = []
         AFT = []
         for each in tasklist:                            
-            list_AST_TransT = []   #AST减去 传输时间
+            list_AST_TransT = []   
             if multiWorflow[each[0]][each[1]].outputs == []:
                 list_AST_TransT.append(multiWorflow[each[0]][each[1]].FinishTime)   # AFT # (Deadline)
             else:
@@ -1333,7 +1174,7 @@ def Adjust_Scheduling():
                             TransTime = 0
                         else:
                             DataTransferRate = min(VMT[CloudID].B[VMS[CloudID][VMnumID].id],  VMT[PreVMnum[0]].B[VMS[PreVMnum[0]][PreVMnum[1]].id]   )
-                            TransTime = (child.size/DataTransferRate * DTT)  #将传输时间放大DTT倍 
+                            TransTime = (child.size/DataTransferRate * DTT)  
                         list_AST_TransT.append(AST_child-TransTime)
             if list_AST_TransT != []:        
                 LFT.append(min(list_AST_TransT))
@@ -1369,14 +1210,13 @@ def Adjust_Scheduling():
         for CloudID in HYBRIDCLOUD:
             VMNums = len(VMS[CloudID])
             for VMnumID in range(VMNums):                                       #VM 
-                for TaskCoreID in range(VMS[CloudID][VMnumID].NumCores):                 #对应的核                
+                for TaskCoreID in range(VMS[CloudID][VMnumID].NumCores):                              
                     Totaltask = len(VMS[CloudID][VMnumID].TaskCore[TaskCoreID])
-                    if Totaltask > 0:              #任务个数大于1
+                    if Totaltask > 0:          
                         tasklist = [VMS[CloudID][VMnumID].TaskCore[TaskCoreID][0]]
                         tasklist_index = [0]
-                        for t_i in range(1,Totaltask):    #逐个任务
+                        for t_i in range(1,Totaltask):   
                             if VMS[CloudID][VMnumID].VMTime[TaskCoreID][t_i-1][1] == VMS[CloudID][VMnumID].VMTime[TaskCoreID][t_i][0]:
-                                # 上一个任务的完成时间  == 当前任务的开始时间
                                 tasklist.append(VMS[CloudID][VMnumID].TaskCore[TaskCoreID][t_i])#insert(len(tasklist),VMS[VMnumID].TaskCore[TaskCoreID][t_i])
                                 tasklist_index.append(t_i)
                             else:
@@ -1385,9 +1225,8 @@ def Adjust_Scheduling():
                     if (Totaltask > 2):
                         tasklist = [VMS[CloudID][VMnumID].TaskCore[TaskCoreID][Totaltask-2]]
                         tasklist_index = [Totaltask-2]
-                        for t_i in range(Totaltask-2-1,0,-1):    #逐个任务
+                        for t_i in range(Totaltask-2-1,0,-1):    
                             if VMS[CloudID][VMnumID].VMTime[TaskCoreID][t_i+1][0] == VMS[CloudID][VMnumID].VMTime[TaskCoreID][t_i][1]:
-                                # 下一个任务的开始时间  == 当前任务的完成时间
                                 tasklist.insert(0,VMS[CloudID][VMnumID].TaskCore[TaskCoreID][t_i])#insert(len(tasklist),VMS[VMnumID].TaskCore[TaskCoreID][t_i])
                                 tasklist_index.insert(0,t_i)
                             else:
@@ -1398,25 +1237,24 @@ def Adjust_Scheduling():
 
 def getEST_MultiWorkflow(self,SimplifiedWorkflow,PCPfactor,PB_PCPfactor ,ddl):
     global HYBRIDCLOUD,PUBLICID,PRIVATEID,ListLevelVM
-    NumPre = len(self.inputs)  #父节点的个数
-    NumSuc = len(self.outputs) #子节点的个数  
-    vmn = None                 #将要选择的VM
-    taskcore = None            #将要选择的VM的核      
-    EST = 0                 #最早开始时间
+    NumPre = len(self.inputs)  
+    NumSuc = len(self.outputs)  
+    vmn = None                 
+    taskcore = None                 
+    EST = 0                
     listInputs = self.inputs
 
     CLOUD = [PRIVATEID] if self.MI==1 else HYBRIDCLOUD
 
     ################################################################################################
-    '''以下内容采用活动化解码方式修改在每台VM上的可开始时间'''
-    ## 父节点的完成时间
+  
+   
     listEST = [[] for j in range(2)]   
     for j in range(NumPre):
         listEST[0].append(listInputs[j].id)  
         listEST[1].append(SimplifiedWorkflow[listInputs[j].id].FinishTime)
-
-    ### 以下采用混合云    
-    EST_VM = [[],[]]  # 不考虑VM的完成时间时，任务在各VM上的可开始时间  
+  
+    EST_VM = [[],[]]    
     for CloudID in CLOUD:
         VMNums = len(VMS[CloudID])
         for j1 in range(VMNums):
@@ -1430,11 +1268,10 @@ def getEST_MultiWorkflow(self,SimplifiedWorkflow,PCPfactor,PB_PCPfactor ,ddl):
                     DataTransferTime = 0
                 else:                      
                     DataTransferRate = min(VMT[CloudID].B[VMS[CloudID][j1].id],  VMT[PreVMnum[0]].B[VMS[PreVMnum[0]][PreVMnum[1]].id]   )
-                    DataTransferTime = (listInputs[j].size/DataTransferRate * DTT)  #将传输时间放大DTT倍 
+                    DataTransferTime = (listInputs[j].size/DataTransferRate * DTT)
                 startTimePreDTT = listEST[1][j]+DataTransferTime
                 for k in range(VMS[CloudID][j1].NumCores):
                     EST_VM[CloudID][j1][k] = max(EST_VM[CloudID][j1][k],startTimePreDTT) #,VMS[j1].CompleteTime[k]          
-    ## 根据任务在每台VM的可开始时间 插空
     listESTVM = [[],[]] 
     ESTVMDifference = [[],[]] 
     for CloudID in CLOUD:
@@ -1463,7 +1300,7 @@ def getEST_MultiWorkflow(self,SimplifiedWorkflow,PCPfactor,PB_PCPfactor ,ddl):
                 for k in range(VMS[CloudID][j1].NumCores):
                     listESTVM[CloudID][j1][k] = max(listESTVM[CloudID][j1][k],VMS[CloudID][j1].CompleteTime[k])
                     ESTVMDifference[CloudID][j1][k]= listESTVM[CloudID][j1][k] - VMS[CloudID][j1].CompleteTime[k]
-    '''设置不超时的VM集合'''
+
     AvailableVM = [[],[]]
     for CloudID in CLOUD:
         VMNums = len(VMS[CloudID]) 
@@ -1486,22 +1323,7 @@ def getEST_MultiWorkflow(self,SimplifiedWorkflow,PCPfactor,PB_PCPfactor ,ddl):
         EST = min(listESTVM[vmn[0]][vmn[1]])
         taskcore = listESTVM[vmn[0]][vmn[1]].index(EST) 
         return vmn,taskcore,EST
-    # elif ((PB_PCPfactor>=0)and(PB_PCPfactor<1) and (((PCPfactor>=1)or(PCPfactor<0)) or(AvailableVM==[[],[]]) )):
-    #     listX = []
-    #     for j in range(len(AvailableVM[PUBLICID])):
-    #         listX.append(min(listESTVM[PUBLICID][AvailableVM[PUBLICID][j]])+self.runtime/VMT[PUBLICID].ProcessingCapacity[VMS[PUBLICID][AvailableVM[PUBLICID][j]].id])
-    #     # ### 某种规则  私有云增加0.5倍        
-    #     listy = []
-    #     for j in range(len(AvailableVM[PUBLICID])):  
-    #         tempValue = (1+PUBLICID)*(ddl-listX[j])*self.runtime/VMT[PUBLICID].ProcessingCapacity[VMS[PUBLICID][AvailableVM[PUBLICID][j]].id]
-    #         tempValue = tempValue/(min(ESTVMDifference[PUBLICID][AvailableVM[PUBLICID][j]])+1)
-    #         listy.append(tempValue)          
-    #     ###  取 最值及其索引
-    #     maxVMIndex = listy.index(max(listy))
-    #     vmn = [PUBLICID, AvailableVM[PUBLICID][maxVMIndex]]
-    #     EST = min(listESTVM[vmn[0]][vmn[1]])
-    #     taskcore = listESTVM[vmn[0]][vmn[1]].index(EST) 
-    #     return vmn,taskcore,EST
+
 
     tempVMSet = [item for item in ListLevelVM if  item[1]  in AvailableVM[item[0]]] #
     if (taskcore == None)and(tempVMSet!=[]):  ## 上一层 VM 最早开始时间
@@ -1527,23 +1349,16 @@ def getEST_MultiWorkflow(self,SimplifiedWorkflow,PCPfactor,PB_PCPfactor ,ddl):
 
         # else:
     if taskcore == None: 
-        #####  在可用VM中选择
-        # listX1 = [ [CloudID,min(listESTVM[CloudID][AvailableVM[CloudID][j]])+self.runtime/VMT[CloudID].ProcessingCapacity[VMS[CloudID][AvailableVM[CloudID][j]].id]] for CloudID in CLOUD for j in range(len(AvailableVM[CloudID]))]
         listX = [[],[]]
         for CloudID in CLOUD:
             for j in range(len(AvailableVM[CloudID])):
                 listX[CloudID].append(min(listESTVM[CloudID][AvailableVM[CloudID][j]])+self.runtime/VMT[CloudID].ProcessingCapacity[VMS[CloudID][AvailableVM[CloudID][j]].id])
-        ### 最早完成
-        # vmn = listX.index(min(listX)) 
-        # ### 某种规则  私有云增加0.5倍        
-        # listy = [(1+0.5*CloudID)*(ddl-listX[CloudID][j])*self.runtime/VMT[CloudID].ProcessingCapacity[VMS[CloudID][AvailableVM[CloudID][j]].id] for CloudID in CLOUD for j in range(len(AvailableVM[CloudID]))]
         listy = [[],[]]
         for CloudID in CLOUD:
             for j in range(len(AvailableVM[CloudID])):  
                 tempValue = (1+CloudID)*(ddl-listX[CloudID][j])*self.runtime/VMT[CloudID].ProcessingCapacity[VMS[CloudID][AvailableVM[CloudID][j]].id]
                 tempValue = tempValue/(min(ESTVMDifference[CloudID][AvailableVM[CloudID][j]])+1)
-                listy[CloudID].append(tempValue)          
-        ###  取 最值及其索引
+                listy[CloudID].append(tempValue)    
         # maxList = [max(listy[CloudID]) for CloudID in CLOUD]
         maxList = []
         for CloudID in CLOUD:
@@ -1581,15 +1396,14 @@ def Urgency(multiWorflowLevel,multiDeadline,FT_Star,ScheduledMultiWFLevel):
     multiWorflowPCP = [[],[]]
     multiUrgency  = [[],[]]
     for CloudID in HYBRIDCLOUD:
-        for i in range(len(multiWorflowLevel)): # 工作流
+        for i in range(len(multiWorflowLevel)): #
             listExcuteTime = []
-            for j in range(ScheduledMultiWFLevel[i], len(multiWorflowLevel[i])): # 工作流的层 multiWorflowLevel[i][j][k] 对应任务 
-                # 下面4句简写
+            for j in range(ScheduledMultiWFLevel[i], len(multiWorflowLevel[i])): # 
                 tempTime = 0           
                 for k in range(len(multiWorflowLevel[i][j])):
                     taskID = multiWorflowLevel[i][j][k]
                     if multiWorflow[i][taskID].runtime/max(VMT[CloudID].ProcessingCapacity)>tempTime:
-                        tempTime = multiWorflow[i][taskID].runtime/max(VMT[CloudID].ProcessingCapacity)  ## 在配置最高的VM
+                        tempTime = multiWorflow[i][taskID].runtime/max(VMT[CloudID].ProcessingCapacity)  ## 
                 listExcuteTime.append(tempTime)
             if listExcuteTime != []:
                 multiUrgency[CloudID].append([i,sum(listExcuteTime)/(multiDeadline[i]['Deadline']-FT_Star[i])])
@@ -1610,18 +1424,18 @@ def HeuristicIndividual():
     VM_AssignedTask = [] #set()
     UsedPRIVATE = [0 for i in PrivateCloudVMType().P]
 
-    LevelMaxFinishTtime = 0 # 当前的最大完工时间
+    LevelMaxFinishTtime = 0
     
-    FT_Star=[0 for i in range(len(multiWorflow))] # 每个工作流的当前最大完成时间
+    FT_Star=[0 for i in range(len(multiWorflow))] # 
     TotalLevel = sum([len(multiWorflowDAGLevel[i]) for i in range(len(multiWorflowDAGLevel))])
-    ScheduledMultiWFLevel = [0 for i in range(len(multiWorflow))] # 每个工作流已调度的层数
+    ScheduledMultiWFLevel = [0 for i in range(len(multiWorflow))] # 
     for kk in range(TotalLevel):
         multiUrgency,multiWorflowPCP = Urgency(multiWorflowDAGLevel,multiWorflowDeadline,FT_Star,ScheduledMultiWFLevel)
         templist = [multiUrgency[PRIVATEID][i][1] for i in range(len(multiUrgency[PRIVATEID]))]    # multiUrgency[PRIVATEID][:][1]        
         maxIndex = templist.index(max(templist))
-        workflowNum = multiUrgency[PRIVATEID][maxIndex][0]# 基于上述规则
+        workflowNum = multiUrgency[PRIVATEID][maxIndex][0]# 
         DiscrSalp.append(workflowNum)
-        ListLevelVM = [] ###  上层任务所部属的VM
+        ListLevelVM = [] ###  
         for i in range(len(multiWorflow)):
             levelNum = ScheduledMultiWFLevel[i]-1
             if levelNum>0:            
@@ -1646,8 +1460,7 @@ def HeuristicIndividual():
             LevelMaxFinishTtime = max(LevelMaxFinishTtime,multiWorflow[workflowNum][taskID].FinishTime)
             if not (vmn in VM_AssignedTask):
                 VM_AssignedTask.append(vmn)
-                ## 此处需要判断是否满足 VM 数量限制
-                if vmn[0]==PRIVATEID: # 私有
+                if vmn[0]==PRIVATEID: 
                     UsedPRIVATE[VMS[vmn[0]][vmn[1]].id] += 1
                     if UsedPRIVATE[VMS[vmn[0]][vmn[1]].id]<GlobalResource.NUMofPrivateCloudVM[VMS[vmn[0]][vmn[1]].id]:
                         VMS[vmn[0]].append(VMScheduling(VMT[vmn[0]].P[VMS[vmn[0]][vmn[1]].id], VMT[vmn[0]].N[VMS[vmn[0]][vmn[1]].id]))
@@ -1684,14 +1497,14 @@ def MateHeuristicIndividual_noLevelTask(Salp):
     VM_AssignedTask = [] #set()
     UsedPRIVATE = [0 for i in PrivateCloudVMType().P]
 
-    LevelMaxFinishTtime = 0 # 当前的最大完工时间
+    LevelMaxFinishTtime = 0 # 
 
-    FT_Star=[0 for i in range(len(multiWorflow))] # 每个工作流的当前最大完成时间
+    FT_Star=[0 for i in range(len(multiWorflow))] # 
     TotalLevel = sum([len(multiWorflowDAGLevel[i]) for i in range(len(multiWorflowDAGLevel))])
-    ScheduledMultiWFLevel = [0 for i in range(len(multiWorflow))] # 每个工作流已调度的层数    
+    ScheduledMultiWFLevel = [0 for i in range(len(multiWorflow))] #    
     for workflowNum in Salp.DiscrSalp: #DiscreteLevel_order
         multiUrgency,multiWorflowPCP = Urgency(multiWorflowDAGLevel,multiWorflowDeadline,FT_Star,ScheduledMultiWFLevel)
-        ListLevelVM = [] ###  上层任务所部属的VM
+        ListLevelVM = [] ###  
         for i in range(len(multiWorflow)):
             levelNum = ScheduledMultiWFLevel[i]-1 #len(tempmultiWorflowDAGLevel[i])-len(multiWorflowDAGLevel[i])-1   #  max(len(multiWorflowDAGLevel[i]),1)#-1
             if levelNum>0:
@@ -1707,7 +1520,7 @@ def MateHeuristicIndividual_noLevelTask(Salp):
                     for parent in multiWorflow[i][taskid].inputs:
                         if multiWorflow[i][parent.id].VMnum not in ListLevelVM:
                             ListLevelVM.append(multiWorflow[i][parent.id].VMnum)                            
-        random.shuffle(multiWorflowDAGLevel[workflowNum][ScheduledMultiWFLevel[workflowNum]]) # 随机顺序
+        random.shuffle(multiWorflowDAGLevel[workflowNum][ScheduledMultiWFLevel[workflowNum]]) # 
         for taskID in multiWorflowDAGLevel[workflowNum][ScheduledMultiWFLevel[workflowNum]]:
             vmn,taskcore,EST = getEST_MultiWorkflow(multiWorflow[workflowNum][taskID],multiWorflow[workflowNum],
                             multiUrgency[PRIVATEID][workflowNum][1],multiUrgency[PUBLICID][workflowNum][1],multiWorflowDeadline[workflowNum]['Deadline']) # getEST(multiWorflow[workflowNum][taskID])
@@ -1716,8 +1529,7 @@ def MateHeuristicIndividual_noLevelTask(Salp):
             LevelMaxFinishTtime = max(LevelMaxFinishTtime,multiWorflow[workflowNum][taskID].FinishTime)
             if not (vmn in VM_AssignedTask):
                 VM_AssignedTask.append(vmn)
-                ## 此处需要判断是否满足 VM 数量限制
-                if vmn[0]==PRIVATEID: # 私有
+                if vmn[0]==PRIVATEID: # 
                     UsedPRIVATE[VMS[vmn[0]][vmn[1]].id] += 1
                     if UsedPRIVATE[VMS[vmn[0]][vmn[1]].id]<GlobalResource.NUMofPrivateCloudVM[VMS[vmn[0]][vmn[1]].id]:
                         VMS[vmn[0]].append(VMScheduling(VMT[vmn[0]].P[VMS[vmn[0]][vmn[1]].id], VMT[vmn[0]].N[VMS[vmn[0]][vmn[1]].id]))
@@ -1726,12 +1538,7 @@ def MateHeuristicIndividual_noLevelTask(Salp):
             if vmn not in ListLevelVM:
                 ListLevelVM.append(vmn)           
         ScheduledMultiWFLevel[workflowNum] += 1
-        # if multiWorflowDAGLevel[workflowNum]!=[]:
-        #     tilde_Pai[workflowNum].update({workflowNum:multiWorflowDAGLevel[workflowNum][0]})
-        # else:
-        #     tilde_Pai[workflowNum].update({workflowNum:[]})
-        # # if sum([len(multiWorflowDAGLevel[i]) for i in range(len(multiWorflowDAGLevel))])==0:
-        # #     break
+
     Adjust_Scheduling()
     # Adaptively_Adjust_First_Task_Block_Multiworkflow()
 
@@ -1754,11 +1561,11 @@ def MateHeuristicIndividual(Salp):
     VM_AssignedTask = [] #set()
     UsedPRIVATE = [0 for i in PrivateCloudVMType().P]
 
-    LevelMaxFinishTtime = 0 # 当前的最大完工时间
+    LevelMaxFinishTtime = 0 #
 
-    FT_Star=[0 for i in range(len(multiWorflow))] # 每个工作流的当前最大完成时间
+    FT_Star=[0 for i in range(len(multiWorflow))] # 
     TotalLevel = sum([len(Salp.LevelTask[i]) for i in range(len(Salp.LevelTask))])
-    ScheduledMultiWFLevel = [0 for i in range(len(multiWorflow))] # 每个工作流已调度的层数    
+    ScheduledMultiWFLevel = [0 for i in range(len(multiWorflow))] #   
     for workflowNum in Salp.DiscrSalp: #DiscreteLevel_order
         multiUrgency,multiWorflowPCP = Urgency(Salp.LevelTask,multiWorflowDeadline,FT_Star,ScheduledMultiWFLevel)
         ListLevelVM = [] ###  上层任务所部属的VM
@@ -1772,8 +1579,6 @@ def MateHeuristicIndividual(Salp):
                     for parent in multiWorflow[i][taskid].inputs:
                         if multiWorflow[i][parent.id].VMnum not in ListLevelVM:
                             ListLevelVM.append(multiWorflow[i][parent.id].VMnum)
-        # random.shuffle(multiWorflowDAGLevel[workflowNum][ScheduledMultiWFLevel[workflowNum]]) # 随机顺序
-        # random.shuffle(Salp.LevelTask[workflowNum][ScheduledMultiWFLevel[workflowNum]]) # 随机顺序 ###  20230313
         for taskID in Salp.LevelTask[workflowNum][ScheduledMultiWFLevel[workflowNum]]:
             vmn,taskcore,EST = getEST_MultiWorkflow(multiWorflow[workflowNum][taskID],multiWorflow[workflowNum],
                             multiUrgency[PRIVATEID][workflowNum][1],multiUrgency[PUBLICID][workflowNum][1],multiWorflowDeadline[workflowNum]['Deadline']) # getEST(multiWorflow[workflowNum][taskID])
@@ -1782,7 +1587,6 @@ def MateHeuristicIndividual(Salp):
             LevelMaxFinishTtime = max(LevelMaxFinishTtime,multiWorflow[workflowNum][taskID].FinishTime)
             if not (vmn in VM_AssignedTask):
                 VM_AssignedTask.append(vmn)
-                ## 此处需要判断是否满足 VM 数量限制
                 if vmn[0]==PRIVATEID: # 私有
                     UsedPRIVATE[VMS[vmn[0]][vmn[1]].id] += 1
                     if UsedPRIVATE[VMS[vmn[0]][vmn[1]].id]<GlobalResource.NUMofPrivateCloudVM[VMS[vmn[0]][vmn[1]].id]:
@@ -1792,14 +1596,6 @@ def MateHeuristicIndividual(Salp):
             if vmn not in ListLevelVM:
                 ListLevelVM.append(vmn)           
         ScheduledMultiWFLevel[workflowNum] += 1
-        # if multiWorflowDAGLevel[workflowNum]!=[]:
-        #     tilde_Pai[workflowNum].update({workflowNum:multiWorflowDAGLevel[workflowNum][0]})
-        # else:
-        #     tilde_Pai[workflowNum].update({workflowNum:[]})
-        # # if sum([len(multiWorflowDAGLevel[i]) for i in range(len(multiWorflowDAGLevel))])==0:
-        # #     break
-    # Adjust_Scheduling()  ###  20230313
-    # # Adaptively_Adjust_First_Task_Block_Multiworkflow()
 
     Obj = GlobalResource.caculateMultiWorkflowMakespan_Cost(multiWorflow,WfDeadline,VMS)
     Salp.multiworflow =multiWorflow
@@ -1881,13 +1677,7 @@ def InitializeSalpPopulation(popsize):
         # gantt_VMState_MultiWorkflow(SalpPopulation[g].VMSchedule,SalpPopulation[g].multiworflow,SalpPopulation[g].objectives)
     return SalpPopulation
 
-# def DetermineWhether2Dominate(salpA,salpB): ## Cost   Energy
-#     ''' salpA 可支配 salpB  '''
-#     if ((salpA.objectives.Cost<=salpB.objectives.Cost) and(salpA.objectives.Energy<=salpB.objectives.Energy)):
-#         # return True  # 包含相等的
-#         if ((salpA.objectives.Cost<salpB.objectives.Cost) or (salpA.objectives.Energy<salpB.objectives.Energy)):
-#             return True
-#     return False
+
 
 def non_dominatedSalps(SalpPopulation,NumNonDominated):
     NonDominSalps = []
@@ -1913,9 +1703,7 @@ def non_dominatedSalps(SalpPopulation,NumNonDominated):
                 kk += 1
             if kk>=len(NonDominSalps)-1:
                 break
-        
-    ##  以下是根据经典的拥挤距离更新非劣解集
-    # NonDominSalps = CalcuCrowdDistance_UpdateNon_domin(NonDominSalps,NumNonDominated)
+
     return NonDominSalps
 
 def CalcuCrowdDistance_UpdateNon_domin(Salps,NumNonDominated):
@@ -1950,8 +1738,7 @@ def CalcuCrowdDistance_UpdateNon_domin(Salps,NumNonDominated):
     else:
         return Salps
 
-### 以下同原程序
-## 非支配解的与上面的相同
+
 def RankingProcess(Salps):
     # if NumNonDominated<len(Salps):
     listCost = [salp.objectives.Cost for salp in Salps]
@@ -1997,19 +1784,17 @@ def HandleFullArchive(Salps,ranks, NumNonDominated):
 
 def LocalSearch_Salp(oldSalp):
     global OriginalMWOrder
-    ''' Destruction and reconstruction 破坏与重构
-        Destruction: 随机 从序列中选取 【序列长度/工作流个数，2*序列长度/工作流个数】
-    '''
+
     Salp = copy.deepcopy(oldSalp)
     for kkkk in range(10):
         # Salp = copy.deepcopy(oldSalp)
-        ###   level 的序列  
+
         numbers = random.randint(math.trunc(len(OriginalMWOrder)/len(Salp.multiworflow) ), math.trunc(2*len(OriginalMWOrder)/len(Salp.multiworflow)))
         poplist = [ Salp.DiscrSalp.pop(random.randint(0,len(Salp.DiscrSalp)-1)) for i in range(numbers) ]
         for each in poplist:
             Salp.DiscrSalp.insert(random.randint(0,len(Salp.DiscrSalp)),each)
 
-        ###   每层task的序列 [1,2]
+
         for i in range(len(Salp.LevelTask)):
             for j in range(len(Salp.LevelTask[i])):
                 if len(Salp.LevelTask[i][j])>2:
@@ -2042,19 +1827,12 @@ def MSSA():
     GAP = UP-DOWN
     AlgorithmStart = time.time()
     SalpPopulation = InitializeSalpPopulation(popsize) # OriginalMWOrder  ### -1,  20230313
-    # SalpPopulation.append(SalpClass())
-    # SalpPopulation[popsize-1] = HeuristicIndividual()
-    # SalpPopulation[popsize-1].DiscrSalp,SalpPopulation[popsize-1].multiworflow,SalpPopulation[popsize-1].VMSchedule,SalpPopulation[popsize-1].objectives = HeuristicIndividual() # 
-    # SalpPopulation[popsize-1].ContiSalp = Discrete_to_Continuous_SOV_rule(SalpPopulation[popsize-1].DiscrSalp,OriginalMWOrder)
+
     NonDominSalps = [] # non_dominatedSalps(SalpPopulation,NumNonDominated) 
     for iter in range(max_iter):
         c1 = 2*math.exp(pow(-(4*iter/max_iter),2))
         NonDominSalps = copy.deepcopy(NonDominSalps) + copy.deepcopy(SalpPopulation)
         NonDominSalps = non_dominatedSalps(NonDominSalps,NumNonDominated)
-
-        # np.save(os.getcwd()+'/ParetoFront/'+'1.npy', NonDominSalps)
-        # # np.save(os.getcwd()+'/ResultExcel/'+'2.npy', NonDominSalps)
-        # kk = np.load(os.getcwd()+'/ParetoFront/'+'1.npy',allow_pickle=True)
 
 
         if len(NonDominSalps)>NumNonDominated:
@@ -2116,8 +1894,10 @@ listfileName.sort()
 listWorkflowNum = GlobalResource.listWorkflowNum # get_globalvalue('listWorkflowNum')   #  [12,155,139,20,82]  #
 # TaotalWfNUm = 5 
 # listWorkflowNum= random.sample([i for i in range(len(listfileName))],TaotalWfNUm)
-for times in range(10):
-    for instance in range(len(listWorkflowNum)):
+repeattimes = 1  #10   # The repeat times is 10 in my paper
+totalNumbersTestProblems = 1 # len(listWorkflowNum)  # The total numbers of test problems is len(listWorkflowNum).
+for times in range(repeattimes):  
+    for instance in range(totalNumbersTestProblems):
         print('****************\t\t2022_SZX_MSSA\t Running times=%d \t instance=%d \t\t\t****************'%(times,instance))
         tempmultiWorflow = []
         multiWorflowDeadline = []
@@ -2132,27 +1912,24 @@ for times in range(10):
             workflow = np.load(os.getcwd()+'/data_npy/'+fileName,allow_pickle=True).item()
             DeadlineFactor = workflow.pop('DeadlineFactor')   
             Deadline = workflow.pop('Deadline') # ResetDeadline(workflow,DeadlineFactor) 
-            OriginalMaxDAGTasks += len(workflow) # 总任务数
-            '''
-            task.MI=1表示具有隐私属性；   task.XFT 为 sub-deadline 
-            '''
+            OriginalMaxDAGTasks += len(workflow) # 
 
             case1_Private(workflow)
-            DAGLevel = taskTopologicalLevel(workflow)     #DAG分层处理
+            DAGLevel = taskTopologicalLevel(workflow)     #
 
-            getSubDeadline(workflow,Deadline)  # 在此算法中用task.XFT表示Sub-deadline
+            getSubDeadline(workflow,Deadline)  #  task.XFT is Sub-deadline
             WfDeadline.append(Deadline)
             multiWorflowDeadline.append({'Deadline':Deadline,'DeadlineFactor':DeadlineFactor,'WorkflowName':WorkFlowTestName} )
             tempmultiWorflowDAGLevel.append(DAGLevel)
             tempmultiWorflow.append(workflow)
-            MaxDAGTasks += len(workflow) # 总任务数
+            MaxDAGTasks += len(workflow) # 
             del workflow
 
-        ## 混合云
+        ## 
         PUBLICID  = 0
         PRIVATEID = 1
         HYBRIDCLOUD = [PUBLICID,PRIVATEID]
-        DTT = GlobalResource.DTT #传输时间放大倍数
+        DTT = GlobalResource.DTT #
         VMT = [VMType(),PrivateCloudVMType()]
         tempVMS = [[],[]]
         for cloudID in HYBRIDCLOUD:

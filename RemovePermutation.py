@@ -69,7 +69,6 @@ class ChromClass:   #  ASC
 
 class ChromClass:  #  IJPR
     def __init__(self):
-        """ .TasksOrder 任务序列"""
         self.VMOrder=None
         self.TasksOrder=None
         self.objectives=None

@@ -86,7 +86,6 @@ def gantt_VMState_MultiWorkflow(self,multiWorflow,objectives):
     marks = ["","\\","/","X","+",".","*","o"]
     #画布设置，大小与分辨率
     plt.figure(dpi=85)
-    #barh-柱状图换向，循坏迭代-层叠效果figsize=(20,8),
     listY = []
     strY = []
     yHeigh = -0.15
@@ -350,7 +349,6 @@ def ResetDeadline(workflow,DeadlineFactor):
 ###########################################################
 class ChromClass:
     def __init__(self):
-        """ .TasksOrder 任务序列"""
         self.VMOrder=None
         self.TasksOrder=None
         self.objectives=None
@@ -386,50 +384,6 @@ def ChromosomeInitialization():
             randomTask = S.pop(random.randint(0,len(S)-1)) #   []
             T.remove(randomTask)
             chromosome.TasksOrder.append(randomTask)
-
-    # DAG = copy.deepcopy(tempmultiWorflow)
-    # T= []
-    # for each in range(len(DAG)):        
-    #     list1 = [taskId for taskId,task in DAG[each].items()]
-    #     DAG[each][len(DAG[each])] = Task(len(DAG[each]),name = 'entry')
-    #     T.append([each,len(DAG[each])-1])
-    #     for taskId in list1:
-    #         T.append([each,taskId])
-    #         if DAG[each][taskId].inputs == []:   #原源节点 size = 0  JITCAWorkflow[len(JITCAWorkflow)-1]
-    #             tout = File('EntryOut', id = len(DAG[each])-1)
-    #             DAG[each][taskId].inputs.append(tout)
-    #             tout = File('Entry', id = taskId)
-    #             DAG[each][len(DAG[each])-1].addOutput(tout)
-    # WFnum = random.randint(0,len(DAG)-1)
-    # TNum = DAG[WFnum][len(DAG[WFnum])-1].id
-
-    # chromosome.TasksOrder = [[WFnum,TNum]]
-    # T.remove([WFnum,TNum])
-    # S = []
-    # while T!=[]:
-    #     for ti in T:            
-    #         nofind = True
-    #         for eachPar in DAG[ti[0]][ti[1]].inputs:
-    #             if [ti[0],eachPar.id] not in chromosome.TasksOrder:
-    #                 nofind = False
-    #                 break
-    #         if nofind:
-    #             S.append(ti)
-    #     # ## 更改后
-    #     # while S != []:            
-    #     #     randomTask = S[random.randint(0,len(S)-1)]
-    #     #     T.remove(randomTask)
-    #     #     chromosome.TasksOrder.append(randomTask)
-    #     #     # S = []
-    #     # 更改前
-    #     randomTask = S[random.randint(0,len(S)-1)]
-    #     T.remove(randomTask)
-    #     chromosome.Y.append(randomTask)
-    #     S = []
-
-    # for WFnum in range(len(DAG)): 
-    #     chromosome.TasksOrder.remove([WFnum,len(DAG[WFnum])-1])
-    # del DAG
 
     for i in range(len(chromosome.multiworflow)):
         for j in range(len(chromosome.multiworflow[i])):
@@ -717,7 +671,6 @@ def AssignVM(VMProbility):
 
 
 def generate_Task_Probility_taskorder(SequencePheromone,SequencePheromone0,TaskLambda):
-    '''无设置时间，将式（18）中的设置时间和设置成本 赋值为1'''
     global  Alpha,Beta,Rho,Q1,Q2,PBVMNums,PRVMNums,TaskList,VMList
 
     TaskProbility0 = []
@@ -863,13 +816,7 @@ def CalcaulateTaskObject_MultiWorkflow(chromosome):
     # gantt_VMState_MultiWorkflow(chromosome.VMSchedule,chromosome.multiworflow,chromosome.objectives)
 
 
-# def DetermineWhether2Dominate(salpA,salpB): ## Cost   Energy
-#     ''' salpA 可支配 salpB  '''
-#     if ((salpA.objectives.Cost<=salpB.objectives.Cost) and(salpA.objectives.Energy<=salpB.objectives.Energy)):
-#         # return True  # 包含相等的
-#         if ((salpA.objectives.Cost<salpB.objectives.Cost) or (salpA.objectives.Energy<salpB.objectives.Energy)):
-#             return True
-#     return False
+
 
 
 def fast_non_dominated_sort(Population):
@@ -933,26 +880,7 @@ def crowding_distance(Population,front):
             if (max(values3)!=min(values3)):
                 distance[dk] = distance[dk]+abs(values3[dk1]-values3[dk0])/(max(values3)-min(values3))
 
-        # if (max(values1)==min(values1))and((max(values2)!=min(values2))):
-        #     for k in range(1,len(front[each])-1):
-        #         dk = front[each].index(sorted1[k])
-        #         dk1 = front[each].index(sorted1[k+1])
-        #         dk0 = front[each].index(sorted1[k-1])
-        #         distance[dk] =distance[dk]+abs(values2[dk1]-values2[dk0])/(max(values2)-min(values2))        
-        # elif (max(values1)!=min(values1))and((max(values2)==min(values2))):
-        #     for k in range(1,len(front[each])-1):
-        #         dk = front[each].index(sorted1[k])
-        #         dk1 = front[each].index(sorted1[k+1])
-        #         dk0 = front[each].index(sorted1[k-1])
-        #         distance[dk] = distance[dk]+abs(values1[dk1]-values1[dk0])/(max(values1)-min(values1))  
-        # elif (max(values1)!=min(values1))and((max(values2)!=min(values2))):
-        #     for k in range(1,len(front[each])-1):
-        #         dk = front[each].index(sorted1[k])
-        #         dk1 = front[each].index(sorted1[k+1])
-        #         dk0 = front[each].index(sorted1[k-1])
-        #         distance[dk] =( distance[dk]+abs(values1[dk1]-values1[dk0])/(max(values1)-min(values1)) 
-        #                                     +abs(values2[dk1]-values2[dk0])/(max(values2)-min(values2)))
-        
+
         crowding_distance.append(distance)
     return crowding_distance
 
@@ -989,48 +917,7 @@ def crossover_twoPoint(salpA,salpB):
     NewsalpA.TasksOrder = sequenceAdjustment(NewsalpA.TasksOrder)
     NewsalpB.TasksOrder = sequenceAdjustment(NewsalpB.TasksOrder)
 
-    # VMorderA = [salpA.VMOrder[TaskList.index(i) ] for i in salpA.TasksOrder]
-    # VMorderB = [salpB.VMOrder[TaskList.index(i) ] for i in salpB.TasksOrder]
-    # a1 = random.randint(1,len(salpA.TasksOrder)-2)
-    # a2 = random.randint(1,len(salpA.TasksOrder)-2)
-    # while a1==a2:
-    #     a2 = random.randint(1,len(salpA.TasksOrder)-2)
-    # if a1>a2: 
-    #     a1,a2 = a2,a1
-    # Order1 = VMorderA[a1:a2+1]
-    # NewVMorderB = []    
-    # for i in range(len(VMorderA)):
-    #     if VMorderB[i] not in Order1:
-    #         NewVMorderB.append(VMorderB[i])
-    #         if len(NewVMorderB)==a1:
-    #             NewVMorderB = NewVMorderB+VMorderA[a1:a2+1]
-    #     else:
-    #         Order1.remove(VMorderB[i])
-    #     if len(NewVMorderB)==len(VMorderA): break
-    # Order1 = VMorderB[a1:a2+1]
-    # NewVMorderA = []    
-    # for i in range(len(VMorderB)):
-    #     if VMorderA[i] not in Order1:
-    #         NewVMorderA.append(VMorderA[i])
-    #         if len(NewVMorderA)==a1:
-    #             NewVMorderA = NewVMorderA+VMorderB[a1:a2+1]
-    #     else:
-    #         Order1.remove(VMorderA[i])
-    #     if len(NewVMorderA)==len(VMorderA): break
-    # VMorderA = [NewVMorderA[salpA.TasksOrder.index(i) ] for i in TaskList]
-    # VMorderB = [NewVMorderB[salpB.TasksOrder.index(i) ] for i in TaskList]
-    
-    # for i in range(len(TaskList)):
-    #     dag = TaskList[i][0]
-    #     taskid = TaskList[i][1]        
-    #     if (tempmultiWorflow[dag][taskid].MI==PRIVATEID):    
-    #         if  VMorderA[i][0]!=PRIVATEID:
-    #             VMorderA[i] = salpA.VMOrder[i]
-    #         if  VMorderB[i][0]!=PRIVATEID:
-    #             VMorderB[i] = salpB.VMOrder[i]
-    # NewsalpA.VMOrder = VMorderA[:]
-    # NewsalpB.VMOrder = VMorderB[:]
-
+ 
     for i in range(len(TaskList)):
         if random.random()>0.5:
             NewsalpA.VMOrder[i] = salpB.VMOrder[i]
@@ -1165,14 +1052,7 @@ def updatePopulation(front,distance,Population,popsize):
             temp.append([front[level][i],distance[level][i]])            
         temp = sorted(temp, key=lambda temp: temp[1])
         front[level] = [temp[i][0] for i in range(len(temp))]
-    # newPopulation = [] 
-    # kk = 0
-    # for level in range(len(front)):
-    #     for i in range(len(front[level])):        
-    #         newPopulation.append(Population[front[level][i]]) 
-    #         kk += 1
-    #         if kk== popsize: break
-    #     if kk== popsize: break
+
     newPopulation = []
     objList = []
     kk = 0
@@ -1281,8 +1161,11 @@ listDeadlineFactor = [0.8,1.1,1.5,1.8]
 listWorkflowNum = GlobalResource.listWorkflowNum # .get_globalvalue('listWorkflowNum')   #  [12,155,139,20,82]  #
 # TaotalWfNUm = 5 
 # listWorkflowNum= random.sample([i for i in range(len(listfileName))],TaotalWfNUm)
-for times in range(10):
-    for instance in range(len(listWorkflowNum)): # 6,
+
+repeattimes = 1  #10   # The repeat times is 10 in my paper
+totalNumbersTestProblems = 1 # len(listWorkflowNum)  # The total numbers of test problems is len(listWorkflowNum).
+for times in range(repeattimes):  
+    for instance in range(totalNumbersTestProblems):
         print('****************\t\t2019_IJPR_MACO\t Running times=%d \t instance=%d \t\t\t****************'%(times,instance))
         tempmultiWorflow= []
         multiWorflowDeadline = []
@@ -1298,27 +1181,24 @@ for times in range(10):
             
             DeadlineFactor = workflow.pop('DeadlineFactor')   
             Deadline = workflow.pop('Deadline') # ResetDeadline(workflow,DeadlineFactor)
-            '''
-            task.MI=1表示具有隐私属性；   task.XFT 为 sub-deadline 
-            '''
-            DAGLevel = taskTopologicalLevel(workflow)     #DAG分层处理
 
-            getSubDeadline(workflow,Deadline)  # 在此算法中用task.XFT表示Sub-deadline
+            DAGLevel = taskTopologicalLevel(workflow)     #
+            getSubDeadline(workflow,Deadline)  #
             WfDeadline.append(Deadline)
             multiWorflowDeadline.append({'Deadline':Deadline,'DeadlineFactor':DeadlineFactor,'WorkflowName':WorkFlowTestName} )
             tempmultiWorflowDAGLevel.append(DAGLevel)
             tempmultiWorflow.append(workflow)
-            MaxDAGTasks += len(workflow) # 总任务数  
+            MaxDAGTasks += len(workflow) # 
             del workflow
         ''' 不执行超过1000的'''
         if MaxDAGTasks>=1000:
             continue
 
-        ## 混合云
+        ## 
         PUBLICID  = 0
         PRIVATEID = 1
         HYBRIDCLOUD = [PUBLICID,PRIVATEID]
-        DTT = GlobalResource.DTT #传输时间放大倍数
+        DTT = GlobalResource.DTT 
         VMT = [VMType(),PrivateCloudVMType()]
 
         NumLevellist = [max([len(tempmultiWorflowDAGLevel[i][j]) for j in range(len(tempmultiWorflowDAGLevel[i]))]) for i in range(len(tempmultiWorflowDAGLevel))] 

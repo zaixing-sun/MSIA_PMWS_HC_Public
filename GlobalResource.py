@@ -39,12 +39,6 @@ def SimplifyVMS(VMS):
             k += 1
     return VMS
  
-def VMStateAdjustment():
-    """
-    VM状态首先是开关机过程中的持续时间，
-    """
-    k = 1
-
 
 def caculateMultiWorkflowMakespan_Cost(resultWorkflow,WfDeadline,VMS):
     PUBLICID  = 0

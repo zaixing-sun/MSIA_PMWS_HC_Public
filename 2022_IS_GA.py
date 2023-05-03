@@ -55,7 +55,6 @@ def taskTopologicalLevel(self):
                         intflag += 1
         if intflag == len(self):
             break
-    ## 以下是从源节点起分层
     DAGLevel = [[] for i in range(max(dictNodeLevel.values())+2)]  
     for key1,value1 in dictNodeLevel.items():
         if value1 == -1:
@@ -65,46 +64,6 @@ def taskTopologicalLevel(self):
             DAGLevel[value1].append(key1)
             self[key1].Level = value1
 
-    # '''以下是从根节点起分层 目前的7种工作流结构，
-    #     只有适用于SIPHT工作流，其他工作流不受影响，
-    #     故当SIPHT工作流效果不好时可以使用 '''
-    # setLevelNode = set() 
-    # dictNodeLevel = {}
-    # intflag = 0
-    # while True:
-    #     for name,task in self.items():  
-    #         if (not(name in setLevelNode)):
-    #             if (len(task.outputs)==0):         
-    #                 setLevelNode.add(name)
-    #                 dictNodeLevel[name] = len(DAGLevel)-1
-    #                 intflag += 1     
-    #             elif  (len(task.inputs)==0):   
-    #                 setLevelNode.add(name)
-    #                 dictNodeLevel[name] = 0
-    #                 intflag += 1 
-    #             else:
-    #                 sucNodedict = {}
-    #                 for each in range(len(task.outputs)):
-    #                     if task.outputs[each].id in setLevelNode:
-    #                         sucNodedict[task.outputs[each].id] = dictNodeLevel[task.outputs[each].id]
-    #                     else:
-    #                         break
-    #                 if len(sucNodedict)==len(task.outputs):
-    #                     dictNodeLevel[name] = min(list(sucNodedict.values()))-1
-    #                     setLevelNode.add(name)
-    #                     intflag += 1
-    #     if intflag == len(self):
-    #         break
-    # DAGLevel_RootNode = [[] for i in range(len(DAGLevel))]
-    # for key1,value1 in dictNodeLevel.items():
-    #     DAGLevel_RootNode[value1].append(key1)
-
-    # ## 按执行时间升序排列
-    # for k in range(len(DAGLevel)):
-    #     for i in range(len(DAGLevel[k])-1):
-    #         for j in range(i+1,len(DAGLevel[k])):
-    #             if self[DAGLevel[k][i]].runtime<self[DAGLevel[k][j]].runtime:
-    #                 DAGLevel[k][i],DAGLevel[k][j] = DAGLevel[k][j], DAGLevel[k][i]
     return DAGLevel
 
 ###########################################################################
@@ -115,7 +74,7 @@ def gantt_VMState_MultiWorkflow(self,multiWorflow,objectives):
     # font = FontProperties()
     # font.set_name('Times New Roman')
     # path = '/path/to/custom/font.ttf'
-    # plt.rcParams['font.sans-serif'] = ['Times New Roman']#解决中文显示为方框的问题  "|","+",
+    # plt.rcParams['font.sans-serif'] = ['Times New Roman']
     # myfont=fm.FontProperties(fname=".\\Class\\times.ttf")
     plt.rcParams["font.family"] = "times new roman"
     colorNum = 10
@@ -124,9 +83,7 @@ def gantt_VMState_MultiWorkflow(self,multiWorflow,objectives):
     # ['red', 'royalblue', 'gold', 'lawngreen', 'orange', 'blueviolet']
     # colors = ['dimgray','tan','lightblue','coral','g','r','silver','y','c']'lightseagreen',
     marks = ["","\\","/","X","+",".","*","o"]
-    #画布设置，大小与分辨率
     plt.figure(dpi=85)
-    #barh-柱状图换向，循坏迭代-层叠效果figsize=(20,8),
     listY = []
     strY = []
     yHeigh = -0.15
@@ -361,13 +318,6 @@ def getLFT(workflow,MET,Deadline):
     return LFT,LST
 
 def getSubDeadline(workflow,Deadline):
-    # ## subD_i = 
-    # MET = getMET_SubDeadline(workflow)
-    # EST,EFT = getEST_SubDeadline(workflow,MET)
-    # SlackTime_maxEFT = 0.95*Deadline/max(EFT) # (1+(Deadline-max(EFT))/max(EFT) ) # 
-    # for taskid,task in workflow.items():
-    #     task.XFT = EFT[taskid] * SlackTime_maxEFT
-    # # return workflow
 
     MET = getMET_SubDeadline(workflow)
     LFT,LST = getLFT(workflow,MET,Deadline)
@@ -402,13 +352,7 @@ def InitializeSalpPopulation(popsize):
         # gantt_VMState_MultiWorkflow(SalpPopulation[g].VMSchedule,SalpPopulation[g].multiworflow,SalpPopulation[g].objectives)
     return SalpPopulation
 
-# def DetermineWhether2Dominate(salpA,salpB): ## Cost   Energy
-#     ''' salpA 可支配 salpB  '''
-#     if ((salpA.objectives.Cost<=salpB.objectives.Cost) and(salpA.objectives.Energy<=salpB.objectives.Energy)):
-#         # return True  # 包含相等的
-#         if ((salpA.objectives.Cost<salpB.objectives.Cost) or (salpA.objectives.Energy<salpB.objectives.Energy)):
-#             return True
-#     return False
+
 
 def non_dominatedSalps(SalpPopulation,NumNonDominated):
     NonDominSalps = []
@@ -470,8 +414,6 @@ def CalcuCrowdDistance_UpdateNon_domin(Salps,NumNonDominated):
     else:
         return Salps
 
-### 以下同原程序
-## 非支配解的与上面的相同
 def RankingProcess(Salps):
     # if NumNonDominated<len(Salps):
     listCost = [salp.objectives.Cost for salp in Salps]
@@ -673,14 +615,6 @@ class ChromClass:
         self.pm = None
         self.pc = None
 
-# def DetermineWhether2Dominate(salpA,salpB): ## Cost   Energy
-#     ''' salpA 可支配 salpB  '''
-#     if ((salpA.objectives.Cost<=salpB.objectives.Cost) and(salpA.objectives.Energy<=salpB.objectives.Energy)):
-#         # return True  # 包含相等的
-#         if ((salpA.objectives.Cost<salpB.objectives.Cost) or (salpA.objectives.Energy<salpB.objectives.Energy)):
-#             return True
-#     return False
-
 
 def fast_non_dominated_sort(Population):
     Population.sort(key=operator.attrgetter('objectives.Energy','objectives.Cost'))
@@ -756,25 +690,6 @@ def crowding_distance(Population,front):
             if (max(values3)!=min(values3)):
                 distance[dk] = distance[dk]+abs(values3[dk1]-values3[dk0])/(max(values3)-min(values3))
 
-        # if (max(values1)==min(values1))and((max(values2)!=min(values2))):
-        #     for k in range(1,len(front[each])-1):
-        #         dk = front[each].index(sorted1[k])
-        #         dk1 = front[each].index(sorted1[k+1])
-        #         dk0 = front[each].index(sorted1[k-1])
-        #         distance[dk] =distance[dk]+abs(values2[dk1]-values2[dk0])/(max(values2)-min(values2))        
-        # elif (max(values1)!=min(values1))and((max(values2)==min(values2))):
-        #     for k in range(1,len(front[each])-1):
-        #         dk = front[each].index(sorted1[k])
-        #         dk1 = front[each].index(sorted1[k+1])
-        #         dk0 = front[each].index(sorted1[k-1])
-        #         distance[dk] = distance[dk]+abs(values1[dk1]-values1[dk0])/(max(values1)-min(values1))  
-        # elif (max(values1)!=min(values1))and((max(values2)!=min(values2))):
-        #     for k in range(1,len(front[each])-1):
-        #         dk = front[each].index(sorted1[k])
-        #         dk1 = front[each].index(sorted1[k+1])
-        #         dk0 = front[each].index(sorted1[k-1])
-        #         distance[dk] =( distance[dk]+abs(values1[dk1]-values1[dk0])/(max(values1)-min(values1)) 
-        #                                     +abs(values2[dk1]-values2[dk0])/(max(values2)-min(values2)))
         
         crowding_distance.append(distance)
     return crowding_distance
@@ -802,7 +717,7 @@ def crossover(salpA,salpB):
         NewsalpA.X[i] = salpB.X[i]
     for i in range(position,len(salpA.X)):
         NewsalpB.X[i] = salpA.X[i]
-    for i in range(len(salpA.X)):  ##  修订交叉结果，具有隐私属性的任务必须在私有云
+    for i in range(len(salpA.X)):  ##  
         task = NewsalpA.Y[i]
         if (NewsalpA.multiworflow[task[0]][task[1]].MI==PRIVATEID and (NewsalpA.X[i][0]!=PRIVATEID)):
             CloudID = PRIVATEID
@@ -853,20 +768,6 @@ def mutation(salpA):  # ,salpB
         else:
             salpA.Y.insert(minMAXIndex,task)
 
-    # position = random.randint(0,len(salpA.X)-1)
-    # task = salpB.Y.pop(position)
-    # # 父节点任务大的索引
-    # minMAXIndex = 0
-    # for parentNode in salpB.multiworflow[task[0]][task[1]].inputs:
-    #     P = [task[0],parentNode.id]
-    #     minMAXIndex = max(minMAXIndex,salpB.Y.index(P))
-    # # 子节点任务最小的索引
-    # maxMinIndex = inf
-    # for parentNode in salpB.multiworflow[task[0]][task[1]].outputs:
-    #     P = [task[0],parentNode.id]
-    #     maxMinIndex = min(maxMinIndex,salpB.Y.index(P))    
-    # InsertPosition = random.randint(minMAXIndex+1,maxMinIndex)
-    # salpB.Y.insert(InsertPosition,task)
 
     position = random.randint(0,len(salpA.X)-1)
     task = salpA.Y[position]
@@ -985,14 +886,7 @@ def updatePopulation(front,distance,Population,popsize):
             temp.append([front[level][i],distance[level][i]])            
         temp = sorted(temp, key=lambda temp: temp[1])
         front[level] = [temp[i][0] for i in range(len(temp))]
-    # newPopulation = [] 
-    # kk = 0
-    # for level in range(len(front)):
-    #     for i in range(len(front[level])):        
-    #         newPopulation.append(Population[front[level][i]]) 
-    #         kk += 1
-    #         if kk== popsize: break
-    #     if kk== popsize: break
+
     newPopulation = []
     objList = []
     kk = 0
@@ -1076,7 +970,7 @@ def GALCS():
 
 # app = xw.App(visible=True,add_book=False)
 # book = app.books.open('.\\ResultExcel\\testszx.xlsx')
-# sheet = book.sheets[0]  #引用工作表   os.getcwd()+  # 'Miscellaneous',
+# sheet = book.sheets[0]  
 
 listfileName=os.listdir('./data_npy') #     os.getcwd() data_npy
 listfileName.sort()
@@ -1085,11 +979,10 @@ listDeadlineFactor = [0.8,1.1,1.5,1.8]
 listWorkflowNum = GlobalResource.listWorkflowNum # .get_globalvalue('listWorkflowNum')   #  [12,155,139,20,82]  #
 # TaotalWfNUm = 5 
 # listWorkflowNum= random.sample([i for i in range(len(listfileName))],TaotalWfNUm)
-for times in range(1):
-    times = 1
-    # for instance in range(len(listWorkflowNum)):
-    if True:
-        instance = 16
+repeattimes = 1  #10   # The repeat times is 10 in my paper
+totalNumbersTestProblems = 1 # len(listWorkflowNum)  # The total numbers of test problems is len(listWorkflowNum).
+for times in range(repeattimes):  
+    for instance in range(totalNumbersTestProblems):
         print('****************\t\t2022_IS_GA\t Running times=%d \t instance=%d \t\t\t****************'%(times,instance))
         tempmultiWorflow= []
         multiWorflowDeadline = []
@@ -1105,26 +998,24 @@ for times in range(1):
             
             DeadlineFactor = workflow.pop('DeadlineFactor')   
             Deadline = workflow.pop('Deadline') # ResetDeadline(workflow,DeadlineFactor)
-            '''
-            task.MI=1表示具有隐私属性；   task.XFT 为 sub-deadline 
-            '''
-            DAGLevel = taskTopologicalLevel(workflow)     #DAG分层处理
 
-            getSubDeadline(workflow,Deadline)  # 在此算法中用task.XFT表示Sub-deadline
+            DAGLevel = taskTopologicalLevel(workflow)     
+
+            getSubDeadline(workflow,Deadline)  # task.XFT is Sub-deadline
             WfDeadline.append(Deadline)
             multiWorflowDeadline.append({'Deadline':Deadline,'DeadlineFactor':DeadlineFactor,'WorkflowName':WorkFlowTestName} )
             tempmultiWorflowDAGLevel.append(DAGLevel)
             tempmultiWorflow.append(workflow)
-            MaxDAGTasks += len(workflow) # 总任务数
+            MaxDAGTasks += len(workflow)
             del workflow
 
 
 
-        ## 混合云
+        ## 
         PUBLICID  = 0
         PRIVATEID = 1
         HYBRIDCLOUD = [PUBLICID,PRIVATEID]
-        DTT = GlobalResource.DTT #传输时间放大倍数
+        DTT = GlobalResource.DTT #
         VMT = [VMType(),PrivateCloudVMType()]
 
         NumLevellist = [max([len(tempmultiWorflowDAGLevel[i][j]) for j in range(len(tempmultiWorflowDAGLevel[i]))]) for i in range(len(tempmultiWorflowDAGLevel))] 

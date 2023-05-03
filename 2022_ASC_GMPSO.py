@@ -72,9 +72,7 @@ def gantt_VMState_MultiWorkflow(self,multiWorflow,objectives):
     global PUBLICID,PRIVATEID
     # font = FontProperties()
     # font.set_name('Times New Roman')
-    # path = '/path/to/custom/font.ttf'
-    # plt.rcParams['font.sans-serif'] = ['Times New Roman']#解决中文显示为方框的问题  "|","+",
-    # myfont=fm.FontProperties(fname=".\\Class\\times.ttf")
+  
     plt.rcParams["font.family"] = "times new roman"
     colorNum = 10
     cmap = plt.get_cmap('gist_rainbow',colorNum) #  spring  Paired autumn
@@ -82,9 +80,7 @@ def gantt_VMState_MultiWorkflow(self,multiWorflow,objectives):
     # ['red', 'royalblue', 'gold', 'lawngreen', 'orange', 'blueviolet']
     # colors = ['dimgray','tan','lightblue','coral','g','r','silver','y','c']'lightseagreen',
     marks = ["","\\","/","X","+",".","*","o"]
-    #画布设置，大小与分辨率
     plt.figure(dpi=85)
-    #barh-柱状图换向，循坏迭代-层叠效果figsize=(20,8),
     listY = []
     strY = []
     yHeigh = -0.15
@@ -319,13 +315,6 @@ def getLFT(workflow,MET,Deadline):
     return LFT,LST
 
 def getSubDeadline(workflow,Deadline):
-    # ## subD_i = 
-    # MET = getMET_SubDeadline(workflow)
-    # EST,EFT = getEST_SubDeadline(workflow,MET)
-    # SlackTime_maxEFT = 0.95*Deadline/max(EFT) # (1+(Deadline-max(EFT))/max(EFT) ) # 
-    # for taskid,task in workflow.items():
-    #     task.XFT = EFT[taskid] * SlackTime_maxEFT
-    # # return workflow
 
     MET = getMET_SubDeadline(workflow)
     LFT,LST = getLFT(workflow,MET,Deadline)
@@ -343,13 +332,7 @@ def ResetDeadline(workflow,DeadlineFactor):
     return Deadline
 
 ###########################################################
-# def DetermineWhether2Dominate(salpA,salpB): ## Cost   Energy
-#     ''' salpA 可支配 salpB  '''
-#     if ((salpA.objectives.Cost<=salpB.objectives.Cost) and(salpA.objectives.Energy<=salpB.objectives.Energy)):
-#         # return True  # 包含相等的
-#         if ((salpA.objectives.Cost<salpB.objectives.Cost) or (salpA.objectives.Energy<salpB.objectives.Energy)):
-#             return True
-#     return False
+
 
 def fast_non_dominated_sort(Population):
     ## values1,values2
@@ -412,26 +395,6 @@ def crowding_distance(Population,front):
             if (max(values3)!=min(values3)):
                 distance[dk] = distance[dk]+abs(values3[dk1]-values3[dk0])/(max(values3)-min(values3))
 
-        # if (max(values1)==min(values1))and((max(values2)!=min(values2))):
-        #     for k in range(1,len(front[each])-1):
-        #         dk = front[each].index(sorted1[k])
-        #         dk1 = front[each].index(sorted1[k+1])
-        #         dk0 = front[each].index(sorted1[k-1])
-        #         distance[dk] =distance[dk]+abs(values2[dk1]-values2[dk0])/(max(values2)-min(values2))        
-        # elif (max(values1)!=min(values1))and((max(values2)==min(values2))):
-        #     for k in range(1,len(front[each])-1):
-        #         dk = front[each].index(sorted1[k])
-        #         dk1 = front[each].index(sorted1[k+1])
-        #         dk0 = front[each].index(sorted1[k-1])
-        #         distance[dk] = distance[dk]+abs(values1[dk1]-values1[dk0])/(max(values1)-min(values1))  
-        # elif (max(values1)!=min(values1))and((max(values2)!=min(values2))):
-        #     for k in range(1,len(front[each])-1):
-        #         dk = front[each].index(sorted1[k])
-        #         dk1 = front[each].index(sorted1[k+1])
-        #         dk0 = front[each].index(sorted1[k-1])
-        #         distance[dk] =( distance[dk]+abs(values1[dk1]-values1[dk0])/(max(values1)-min(values1)) 
-        #                                     +abs(values2[dk1]-values2[dk0])/(max(values2)-min(values2)))
-        
         crowding_distance.append(distance)
     return crowding_distance
 
@@ -667,7 +630,6 @@ def Mutate(Child):
 ###########################################################
 
 def ChromosomeInitialization():
-    '''初始化'''
     # global PUBLICID,PRIVATEID,multiWorflow,VMS,multiWorflowDAGLevel,LevelMaxFinishTtime,FT_Star,ListLevelVM  # 
     chromosome = ChromClass()
     chromosome.multiworflow = copy.deepcopy(tempmultiWorflow)
@@ -785,7 +747,6 @@ def CalcaulateTaskObject_MultiWorkflow(chromosome):
 
 class ChromClass:
     def __init__(self):
-        """ .TasksOrder 任务序列"""
         self.VMOrder=None
         self.TasksOrder=None
         self.objectives=None
@@ -888,8 +849,10 @@ listDeadlineFactor = [0.8,1.1,1.5,1.8]
 listWorkflowNum = GlobalResource.listWorkflowNum # .get_globalvalue('listWorkflowNum')   #  [12,155,139,20,82]  #
 # TaotalWfNUm = 5 
 # listWorkflowNum= random.sample([i for i in range(len(listfileName))],TaotalWfNUm)
-for times in range(2):
-    for instance in range(len(listWorkflowNum)):
+repeattimes = 1  #10   # The repeat times is 10 in my paper
+totalNumbersTestProblems = 1 # len(listWorkflowNum)  # The total numbers of test problems is len(listWorkflowNum).
+for times in range(repeattimes):  
+    for instance in range(totalNumbersTestProblems):
         print('****************\t\t2022_ASC_GMPSO\t Running times=%d \t instance=%d \t\t\t****************'%(times,instance))
         tempmultiWorflow= []
         multiWorflowDeadline = []
@@ -905,12 +868,10 @@ for times in range(2):
             
             DeadlineFactor = workflow.pop('DeadlineFactor')   
             Deadline = workflow.pop('Deadline') # ResetDeadline(workflow,DeadlineFactor)
-            '''
-            task.MI=1表示具有隐私属性；   task.XFT 为 sub-deadline 
-            '''
-            DAGLevel = taskTopologicalLevel(workflow)     #DAG分层处理
 
-            getSubDeadline(workflow,Deadline)  # 在此算法中用task.XFT表示Sub-deadline
+            DAGLevel = taskTopologicalLevel(workflow)    
+
+            getSubDeadline(workflow,Deadline) 
             WfDeadline.append(Deadline)
             multiWorflowDeadline.append({'Deadline':Deadline,'DeadlineFactor':DeadlineFactor,'WorkflowName':WorkFlowTestName} )
             tempmultiWorflowDAGLevel.append(DAGLevel)
@@ -921,15 +882,14 @@ for times in range(2):
 
 
 
-        ## 混合云
+        ## 
         PUBLICID  = 0
         PRIVATEID = 1
         HYBRIDCLOUD = [PUBLICID,PRIVATEID]
-        DTT = GlobalResource.DTT #传输时间放大倍数
+        DTT = GlobalResource.DTT 
         VMT = [VMType(),PrivateCloudVMType()]
         PRVMs = sum(GlobalResource.NUMofPrivateCloudVM)
         # PBVMs = MaxDAGTasks - PRVMs
-        '''20220906修改公有云资源数量'''
         NumLevellist = [max([len(tempmultiWorflowDAGLevel[i][j]) for j in range(len(tempmultiWorflowDAGLevel[i]))]) for i in range(len(tempmultiWorflowDAGLevel))] 
         EachPBVMTypeNums = math.trunc(np.average(NumLevellist)) #sum(NumLevellist)
         PBVMs = VMT[PUBLICID].m*EachPBVMTypeNums   #GlobalResource.VMNums
